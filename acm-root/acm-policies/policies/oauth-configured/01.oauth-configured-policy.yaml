@@ -1,0 +1,41 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: oauth-configured-policy
+  namespace: acm-policies
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: oauth-configured-policy
+        spec:
+          remediationAction: enforce
+          severity: high
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                data:
+                  htpasswd: cmgtYWRtaW46JDJ5JDA1JE5VU0NCQnRUTEJuSTJvY1FNZGxFdk9wYndnRERtRE9zYnN0eWlNNzY2Q3RRdVBFRFBabUhXCg==
+                kind: Secret
+                metadata:
+                  name: htpasswd
+                  namespace: openshift-config
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: config.openshift.io/v1
+                kind: OAuth
+                metadata:
+                  name: cluster
+                spec:
+                  identityProviders:
+                  - name: htpasswd
+                    type: HTPasswd
+                    mappingMethod: claim
+                    htpasswd:
+                      fileData:
+                        name: htpasswd
+          pruneObjectBehavior: None
